@@ -1,0 +1,32 @@
+using GameLoanManager.Domain.Commands.Friends.CreateFriend;
+using GameLoanManager.Domain.Test.Tests.Commands.Friends.CreateFriendCommandHandlerTests;
+using Moq;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace GameLoanManager.Domain.Test.Tests.Commands.CreateFriend
+{
+    public class CreateFriendCommandHandlerTest : IClassFixture<CreateFriendCommandHandlerFixture>
+    {
+        private readonly CreateFriendCommandHandlerFixture _fixture;
+        private readonly CreateFriendCommandHandler _handler;
+
+        public CreateFriendCommandHandlerTest(CreateFriendCommandHandlerFixture fixture)
+        {
+            _fixture = fixture;
+            _fixture.AutoMoqer = new AutoMoqCore.AutoMoqer();
+            _fixture.SetupInitial();
+            _handler = _fixture.AutoMoqer.Create<CreateFriendCommandHandler>();
+        }
+
+        [Fact(DisplayName = "Should Be Success When Call Method Handle")]
+        public async Task Given_Handle_When_CreateFriendCommand_Is_Valid_Should_Insert_One()
+        {
+            var command = _fixture.GetCreateFriendCommand;
+
+            await _handler.Handle(command, default);
+
+            _fixture.RepositoryMock.Verify(_fixture.IFriendRepositoryInsertOneAsyncExpression, Times.Once);
+        }
+    }
+}
