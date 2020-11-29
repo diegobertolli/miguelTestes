@@ -1,0 +1,65 @@
+
+using AutoMapper;
+using AutoMoqCore;
+using FizzWare.NBuilder;
+using GameLoanManager.Domain.Commands.Friends.CreateFriend;
+using GameLoanManager.Domain.Contracts;
+using GameLoanManager.Domain.Entities;
+using Microsoft.Extensions.Logging;
+using Moq;
+using System;
+using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace GameLoanManager.Domain.Test.Tests.Commands.Friends.CreateFriendCommandHandlerTests
+{
+    public class CreateFriendCommandHandlerFixture
+    {
+        public AutoMoqer AutoMoqer;
+        public Mock<IFriendRepository> RepositoryMock;
+        public Mock<ILogger<CreateFriendCommandHandler>> LoggerMock;
+
+
+        public Expression<Func<IFriendRepository, Task>> IFriendRepositoryInsertOneAsyncExpression =
+            s => s.InsertOneAsync(It.IsAny<Friend>(), default);
+
+        public Expression<Action<ILogger<CreateFriendCommandHandler>>> ILoggerLogInformationExpression =
+            s => s.LogInformation(It.IsAny<string>(), It.IsAny<object[]>());
+
+
+        public void SetupRepositoryMock()
+        {
+            RepositoryMock = AutoMoqer.GetMock<IFriendRepository>(MockBehavior.Strict);
+            RepositoryMock.Setup(IFriendRepositoryInsertOneAsyncExpression)
+                .Returns(Task.CompletedTask);
+            AutoMoqer.SetInstance(RepositoryMock);
+        }
+
+        public void SetupLoggerMock()
+        {
+            LoggerMock = AutoMoqer.GetMock<ILogger<CreateFriendCommandHandler>>();
+            AutoMoqer.SetInstance(LoggerMock);
+        }
+
+        public void SetupIMapperMock()
+        {
+            IMapper map = new MapperConfiguration(config =>
+            {
+                config.AddProfile<CreateFriendCommandProfile>();
+            }).CreateMapper();
+            AutoMoqer.SetInstance(map);
+        }
+
+        public void SetupInitial()
+        {
+            SetupRepositoryMock();
+            SetupLoggerMock();
+            SetupIMapperMock();
+        }
+
+        public CreateFriendCommand GetCreateFriendCommand =>
+            Builder<CreateFriendCommand>.CreateNew()
+            .Build();
+    }
+}
